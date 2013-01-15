@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<scpd xmlns="urn:schemas-upnp-org:service-1-0">
+  <specVersion>
+    <major>1</major>
+    <minor>0</minor>
+  </specVersion>
+  <serviceStateTable>
+		
+    <stateVariable>
+       <sendEventsAttribute>no</sendEventsAttribute>
+       <name>Port</name>
+       <dataType>string</dataType>
+       <shortCode>port</shortCode>
+    </stateVariable>
+    <stateVariable>
+       <sendEventsAttribute>no</sendEventsAttribute>
+       <name>PingInterval</name>
+       <dataType>string</dataType>
+       <shortCode>pinginterval</shortCode>
+    </stateVariable>
+    <stateVariable>
+       <sendEventsAttribute>no</sendEventsAttribute>
+       <name>PingStatus</name>
+       <dataType>string</dataType>
+       <shortCode>pingstatus</shortCode>
+    </stateVariable>
+    <stateVariable>
+       <sendEventsAttribute>no</sendEventsAttribute>
+       <name>IdleTime</name>
+       <dataType>string</dataType>
+       <shortCode>idletime</shortCode>
+    </stateVariable>
+    <stateVariable>
+       <sendEventsAttribute>no</sendEventsAttribute>
+       <name>PlayerStatus</name>
+       <dataType>string</dataType>
+       <shortCode>playerstatus</shortCode>
+    </stateVariable>
+		
+  </serviceStateTable>
+  <actionList>
+	
+    <action>
+      <name>SetPlayerStatus</name>
+      <argumentList>
+        <argument>
+          <name>newPlayerStatus</name>
+          <direction>in</direction>
+          <relatedStateVariable>PlayerStatus</relatedStateVariable>
+        </argument>
+      </argumentList>
+    </action>
+    <action>
+      <name>GetPlayerStatus</name>
+      <argumentList>
+        <argument>
+          <name>PlayerStatusValue</name>
+          <direction>out</direction>
+          <relatedStateVariable>PlayerStatus</relatedStateVariable>
+        </argument>
+      </argumentList>
+    </action>
+	<action>
+      <name>XBMCall</name>
+      <argumentList>
+        <argument>
+          <name>action</name>
+          <direction>in</direction>
+          <relatedStateVariable>varaction</relatedStateVariable>
+        </argument>
+      </argumentList>
+    </action>
+	
+  </actionList>
+</scpd>
+ 
+ 

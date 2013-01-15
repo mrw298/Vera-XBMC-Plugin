@@ -1,0 +1,33 @@
+<?xml version="1.0"?>
+<root xmlns="urn:schemas-upnp-org:device-1-0">
+  <specVersion>
+    <major>1</major>
+    <minor>0</minor>
+  </specVersion>
+  <device>
+    <deviceType>urn:schemas-upnp-org:device:XBMC:1</deviceType>
+    <staticJson>D_XBMCRemote.json</staticJson> 
+    <friendlyName>XBMCRemote</friendlyName>
+    <manufacturer>chixxi</manufacturer>
+    <manufacturerURL></manufacturerURL>
+    <modelDescription>XBMCRemote</modelDescription>
+    <modelName>XBMCRemote</modelName>
+    <modelNumber>1.0</modelNumber>
+    <protocol>cr</protocol>
+    <handleChildren>0</handleChildren>
+  <serviceList>
+      <service>
+        <serviceType>urn:schemas-upnp-org:service:XBMC:1</serviceType>
+        <serviceId>urn:upnp-org:serviceId:XBMC1</serviceId>
+        <controlURL>/upnp/control/XBMC1</controlURL>
+        <eventSubURL>/upnp/event/XBMC1</eventSubURL>
+        <SCPDURL>S_XBMCRemote.xml</SCPDURL>
+      </service>
+    </serviceList>
+    <implementationList>
+      <implementationFile>I_XBMCRemote.xml</implementationFile>
+    </implementationList>
+  </device>
+</root>
+ 
+ 
