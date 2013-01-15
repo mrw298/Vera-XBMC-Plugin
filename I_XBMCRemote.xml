@@ -1,6 +1,8 @@
 <?xml version="1.0"?>
 <implementation>
   <functions>
+	local dkjson = require("L_GoogleLatitude_dkjson")
+  
   	local ipAddress
 	local json_http_port
 	local json_tcp_port
@@ -13,6 +15,8 @@
 	local DEFAULT_XBMC_TCP_PORT = 9090
 	local DEFAULT_XBMC_HTTP_PORT = 80
 	local DEFAULT_PING_TIME = 180
+	
+	local SOON = 5
 	
 	
 	local function log(stuff, level)
@@ -66,134 +70,165 @@
 		curlresponse = os.execute(curlcommand)
 		debug("CURLCALL ANSWER: " .. curlresponse)
 	end
+	
+	function xbmc_json_call( meth, para )
+		--local cmd = '{"jsonrpc": "2.0", "method": "" .. meth .. "", "params": {" .. para .. "}, "id": 1}'
+		
+		local request = {
+							jsonrpc = "2.0";
+							id = "1";
+						}
+						
+		if meth ~= nil then request.method = meth end
+		if (para ~= nil) and (type(para) == "table")then request.params = para end
+		
+		local cmd = json.encode(request)
+		
+		return sendCommand(cmd)		
+	end
 
 	function XBMCall (action)
-
-		--LEFT
-		if (action == "left") then
-		method = "Input.Left"
-		params = ""
+		local method = ""
+		local params = nil
 	
+		--PING
+		if (action == "ping" ) then
+			method = "JSONRPC.Ping"
+		
+		--LEFT
+		elseif(action == "left") then
+			method = "Input.Left"	
+		
 		--RIGHT
 		elseif (action == "right") then
-		method = "Input.Right"
-		params = ""
+			method = "Input.Right"
 
 		--UP
 		elseif (action == "up") then
-		method = "Input.Up"
-		params = ""
+			method = "Input.Up"
 
 		--DOWN
 		elseif (action == "down") then
-		method = "Input.Down"
-		params = ""
-
+			method = "Input.Down"
+		
 		--BACK
 		elseif (action == "back") then
-		method = "Input.Back"
-		params = ""
+			method = "Input.Back"		
 
 		--HOME
 		elseif (action == "home") then
-		method = "Input.Home"
-		params = ""
-
+			method = "Input.Home"
+		
 		--ENTER
 		elseif (action == "enter") then
-		method = "Input.Select"
-		params = ""
+			method = "Input.Select"
 
 		--PLAY / PAUSE
 		elseif (action == "playpause") then
-		method = "Player.PlayPause"
-		params = "\"playerid\": 1"
+			method = "Player.PlayPause"
+			params = {
+				playerid = "1";
+			}
 
 		--STOP
 		elseif (action == "stop") then
-		method = "Player.Stop"
-		params = "\"playerid\": 1"
+			method = "Player.Stop"
+			params = {
+				playerid = "1";
+			}
 
 		--MUTE
 		elseif (action == "mute") then
-		method = "Application.SetMute"
-		params = "\"mute\": \"toggle\""
+			method = "Application.SetMute"
+			params = {
+				mute = "toggle";
+			}
 		
 		--REBOOT
 		elseif (action == "reboot") then
-		method = "System.Reboot"
-		params = ""
+			method = "System.Reboot"
 		
 		--SUSPEND
 		elseif (action == "suspend") then
-		method = "System.Suspend"
-		params = ""
+			method = "System.Suspend"
 		
 		--SHUTDOWN
 		elseif (action == "shutdown") then
-		method = "System.Shutdown"
-		params = ""
+			method = "System.Shutdown"
 		
 		--AUDIO LIBRARY UPDATE
 		elseif (action == "audioupdate") then
-		method = "AudioLibrary.Scan"
-		params = ""
+			method = "AudioLibrary.Scan"
 		
 		--AUDIO LIBRARY CLEAN
 		elseif (action == "audioclean") then
-		method = "AudioLibrary.Clean"
-		params = ""
+			method = "AudioLibrary.Clean"
 		
 		--VIDEO LIBRARY SCAN
 		elseif (action == "videoupdate") then
-		method = "VideoLibrary.Scan"
-		params = ""
+			method = "VideoLibrary.Scan"
 		
 		--VIDEO LIBRARY CLEAN
 		elseif (action == "videoclean") then
-		method = "VideoLibrary.Clean"
-		params = ""
+			method = "VideoLibrary.Clean"
 		
 		--NEXT
 		elseif (action == "next") then
-		method = "Player.GoNext"
-		params = "\"playerid\": 1"
+			method = "Player.GoNext"
+			params = {
+				playerid = "1";
+			}
 		
 		--PREVIOUS
 		elseif (action == "prev") then
-		method = "Player.GoPrevious"
-		params = "\"playerid\": 1"
+			method = "Player.GoPrevious"
+			params = {
+				playerid = "1";
+			}
 		
 		--FASTER
 		elseif (action == "faster") then
-		method = "Player.SetSpeed"
-		params = "\"playerid\": 1, \"speed\":\"increment\""
+			method = "Player.SetSpeed"
+			params = {
+				playerid = "1";
+				speed = "increment";
+			}
 		
 		--SLOWER
 		elseif (action == "slower") then
-		method = "Player.SetSpeed"
-		params = "\"playerid\": 1, \"speed\":\"decrement\""
+			method = "Player.SetSpeed"
+			params = {
+				playerid = "1";
+				speed = "decrement";
+			}		
 		
 		--VOLUME UP
 		elseif (action == "vup") then
-		method = "Application.SetVolume"
-		params = "\"volume\":100"
+			method = "Application.SetVolume"
+			params = {
+				volume = "100";
+			}
 		
 		--VOLUME DOWN
 		elseif (action == "vdown") then
-		method = "Application.SetVolume"
-		params = "\"volume\":0"
+			method = "Application.SetVolume"
+			params = {
+				volume = "0";
+			}
 
 		--ERROR
 		else
-		debug("XBMCall Command not found! action: " .. action)
-		
+			debug("XBMCall Command not found! action: " .. action)		
 		end
 
-		debug("action: " .. action .. " method: " ..method .. " params: " ..params)
+		local dbg_str = ""
+		if (action ~= nil) then dbg_str = dbg_str .. "action: " .. action end
+		if (method ~= nil) then dbg_str = dbg_str .. " method: " .. method end
+		if (params ~= nil) then dbg_str = dbg_str .. " params: " .. table.concat(params) end		
+		debug( dbg_str )
 		
-		curlcall (method, params)
-
+		--curlcall (method, params)
+		return xbmc_json_call( method, params )
 	end
 	
 
@@ -238,8 +273,10 @@
 	
 	function xbmc_ping()
 		
-		local ping_cmd ="{\"jsonrpc\": \"2.0\", \"method\": \"JSONRPC.Ping\", \"id\": 1}"
-		local result = sendCommand(ping_cmd)
+		--local ping_cmd ="{\"jsonrpc\": \"2.0\", \"method\": \"JSONRPC.Ping\", \"id\": 1}"		
+		--local result = sendCommand(ping_cmd)
+		
+		local result = XBMCall( "ping" )
 		
 		return result
 	end
@@ -320,7 +357,8 @@
 			return false,'Cannot connect. Confirm the IP address is correct.','XBMC'
 		end
 		
-		luup.call_timer("scheduled_ping", 1, ping_interval, "", "")
+		-- at startup do the first ping nearly immediately without waiting for the usual interval
+		luup.call_timer("scheduled_ping", 1, SOON, "", "")
 		
 		log("startup complete: " .. tostring(lul_device))
 		
