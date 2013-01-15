@@ -377,6 +377,10 @@
 	
 	local function XBMC_processIncomingMessage(msg)
 		debug( "XBMC_processIncomingMessage: " .. msg )
+		
+		-- if we got a notification we must be up, so log the device as up
+		scheduled_ping_ok()
+		
 		local oMsg = json.decode(msg)
 		
 		if ((oMsg == nil) or (type(oMsg) ~= "table")) then 
