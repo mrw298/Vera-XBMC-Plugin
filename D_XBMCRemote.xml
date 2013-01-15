@@ -13,7 +13,7 @@
     <modelDescription>XBMCRemote</modelDescription>
     <modelName>XBMCRemote</modelName>
     <modelNumber>1.0</modelNumber>
-    <protocol>cr</protocol>
+    <protocol>raw</protocol>
     <handleChildren>0</handleChildren>
   <serviceList>
       <service>

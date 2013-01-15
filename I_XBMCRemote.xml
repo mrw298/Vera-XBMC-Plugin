@@ -2,11 +2,18 @@
 <implementation>
   <functions>
   	local ipAddress
-	local port
+	local json_http_port
+	local json_tcp_port
+	local ping_interval
 	local serviceid = "urn:upnp-org:serviceId:XBMC1"
 	local deviceid = lul_device
 		
 	local DEBUG_MODE = true
+	
+	local DEFAULT_XBMC_TCP_PORT = 9090
+	local DEFAULT_XBMC_HTTP_PORT = 80
+	local DEFAULT_PING_TIME = 180
+	
 	
 	local function log(stuff, level)
 		luup.log("XBMC: " .. stuff, (level or 50))
@@ -18,31 +25,42 @@
 		end
 	end
   
-	function getport (lul_device)
-		local getports = luup.variable_get(serviceid,"Port", lul_device)
-		return getports
-	end
- 
-	function isup ()
-		pingcommand = "ping -c 1 " ..ipAddress
-		pingresponse = os.execute(pingcommand)
-		if (pingresponse == 0) then
-			luup.variable_set(serviceid,"PingStatus","up",lul_device)
-			debug("XBMCRemote is UP!")
-		else
-			luup.variable_set(serviceid,"PingStatus","down",lul_device)
-			luup.variable_set(serviceid,"PlayerStatus","--",lul_device)
-			luup.variable_set(serviceid,"IdleTime","--",lul_device)
-			debug("XBMCRemote is DOWN!")
-		end
-		luup.call_timer("isup", 1, 180, "", "")
-	end
-
+  	-- From the NEST plugin
+	local function readVariableOrInit(lul_device, serviceId, name, defaultValue) 
+      local var = luup.variable_get(serviceId, name, lul_device)
+      if (var == nil) then
+        var = defaultValue
+        luup.variable_set(serviceId, name, var, lul_device)
+		log("Initialized variable: '" .. name .. "' = '" .. var .. "' SID is " .. serviceId )
+      end
+      return var
+    end
+	
+	-- From the NEST plugin
+	local function writeVariable(lul_device, serviceId, name, value) 
+      luup.variable_set(serviceId, name, value, lul_device)
+    end
+	
+	-- Originally from the NEST plugin
+	local function writeVariableIfChanged(lul_device, serviceId, name, value)
+      local curValue = luup.variable_get(serviceId, name, lul_device)
+	  
+	  -- convert to strings as numeric comparison of floats was hit
+	  -- and miss to say the least
+	  
+      if (tostring(value) ~= tostring(curValue)) then
+        writeVariable(lul_device, serviceId, name, value)
+		log("Changed variable: '" .. name .. "' = '" .. value .. "' SID is " .. serviceId )
+        return true
+      else
+        return false
+      end
+    end
+	
  	function curlcall (meth, para)
-		port = getport ()
-		--debug("CURLCALL: port: " .. port .. " meth: " ..meth .. " para: " ..para .. " ip: " ..ipAddress)
+		--debug("CURLCALL: port: " .. json_http_port .. " meth: " ..meth .. " para: " ..para .. " ip: " ..ipAddress)
 		
-		curlcommand = "curl -i -X POST -d '{\"jsonrpc\": \"4.0\", \"method\": \"" .. meth .. "\", \"params\": {" .. para .. "}, \"id\": 1}' http://" .. ipAddress .. ":" .. port .. "/jsonrpc"
+		curlcommand = "curl -i -X POST -d '{\"jsonrpc\": \"4.0\", \"method\": \"" .. meth .. "\", \"params\": {" .. para .. "}, \"id\": 1}' http://" .. ipAddress .. ":" .. json_http_port .. "/jsonrpc"
 		debug("CURLCALL COMMAND: " .. curlcommand)
 		
 		curlresponse = os.execute(curlcommand)
@@ -177,53 +195,157 @@
 		curlcall (method, params)
 
 	end
+	
+
+	function sendCommand(command)
+		if (luup.io.write(command) == false) then
+			log("Cannot send command " .. command .. " communications error")
+			luup.set_failure(true)
+			return false
+		end
+		return true
+	end
+	
+	local function nextchar(result)
+		return coroutine.yield(result)
+	end
+
+	local function JSONRPC_Process_Coroutine(ch)
+		while true do
+			local result
+			if ( '{' == ch ) then
+					local open_braces_found = 1
+					result = ch
+					while true do
+						next_ch = nextchar()
+
+						result = result .. next_ch
+
+						if (next_ch == "{") then open_braces_found = open_braces_found + 1 end
+						if (next_ch == "}") then open_braces_found = open_braces_found - 1 end
+
+						if ( open_braces_found &lt;= 0 ) then break end
+
+					end
+			end
+
+			if ( result ~= nil) then debug( "result: " .. result ) end
+			ch = nextchar(result)
+		end
+	end
+
+	local JSONRPC_Process = coroutine.wrap(JSONRPC_Process_Coroutine)
+	
+	function xbmc_ping()
+		
+		local ping_cmd ="{\"jsonrpc\": \"2.0\", \"method\": \"JSONRPC.Ping\", \"id\": 1}"
+		local result = sendCommand(ping_cmd)
+		
+		return result
+	end
+	
+	function getPlayerStatus()
+		return luup.variable_get(serviceid, "PlayerStatus", lul_device)
+	end
+	
+	function setPlayerStatus(status)
+		return luup.variable_set(serviceid,"PlayerStatus", status, lul_device)
+	end
+	
+	-- regular ping
+	function scheduled_ping()
+		log("sending routine ping")
+	
+		local result = xbmc_ping()
+		if (result == true) then
+			luup.variable_set(serviceid,"PingStatus","up",lul_device)
+			debug("XBMCRemote is UP!")
+		else
+			luup.variable_set(serviceid,"PingStatus","down",lul_device)
+			setPlayerStatus("--")
+			luup.variable_set(serviceid,"IdleTime","--",lul_device)
+			debug("XBMCRemote is DOWN!")
+		end
+		
+		luup.call_timer("scheduled_ping", 1, ping_interval, "", "")
+	end
+	
+	local function XBMC_processIncomingMessage(msg)
+		
+	end
+
+	
+		-- processed byte by byte
+	local function XBMC_processIncoming(s)
+		if (luup.is_ready(PARENT_DEVICE) == false) then
+			return
+		end
+	
+		local msg = JSONRPC_Process( s )
+
+		if ( msg ~= nil ) then			
+			debug( "MSG received: " .. msg )
+			XBMC_processIncomingMessage(msg)
+		end
+	end
+
 	 
 	function init(lul_device)
 		ipAddress = luup.devices[lul_device].ip
+		
+		json_tcp_port = readVariableOrInit(PARENT_DEVICE, XBMC_SID, "XBMC_TCP_port", DEFAULT_XBMC_TCP_PORT)
+		json_http_port = readVariableOrInit(PARENT_DEVICE, XBMC_SID, "XBMC_HTTP_port", DEFAULT_XBMC_HTTP_PORT)		
+		ping_interval = readVariableOrInit(PARENT_DEVICE, XBMC_SID, "PingInterval", DEFAULT_PING_TIME)
 
+		log("starting device: " .. tostring(lul_device))
+
+		
 		if (ipAddress == nil or ipAddress == "") then
 			return false, "IP Address is required in Device's Advanced Settings!", "XBMCRemote"
 		else
-			local Port1 = luup.variable_get(serviceid,"Port", lul_device)
-			if Port1 == nil then
-				luup.variable_set(serviceid,"Port","80",lul_device)
-			end
-			local PingInterval1 = luup.variable_get(serviceid,"PingInterval", lul_device)
-			if PingInterval1 == nil then
-				luup.variable_set(serviceid,"PingInterval","180",lul_device)
-			end
-			local PingStatus1 = luup.variable_get(serviceid,"PingStatus", lul_device)
-			if PingStatus1 == nil then
-				luup.variable_set(serviceid,"PingStatus","--",lul_device)
-			end
-			local IdleTime1 = luup.variable_get(serviceid,"IdleTime", lul_device)
-			if IdleTime1 == nil then
-				luup.variable_set(serviceid,"IdleTime","--",lul_device)
-			end
-			local PlayerStatus1 = luup.variable_get(serviceid,"PlayerStatus", lul_device)
-			if PlayerStatus1 == nil then
-				luup.variable_set(serviceid,"PlayerStatus","--",lul_device)
-			end
-			isup()
-			--debug("XBMCRemote successfully initialized!")	
+			local PingStatus1 = readVariableOrInit( lul_device, serviceid, "PingStatus", "--")
+			local IdleTime1 = readVariableOrInit( lul_device, serviceid, "IdleTime", "--")
+			local PlayerStatus1 = readVariableOrInit( lul_device, serviceid, "PlayerStatus", "--")
 		end
+		
+		if (ipAddress ~= "") and (json_tcp_port ~= "") then
+			log("Connecting to XBMC host on: " .. ipAddress .. ":" .. json_tcp_port )
+			luup.io.open(PARENT_DEVICE, ipAddress, json_tcp_port)
+		else
+			return false,'No IP supplied, please enter the IP.','XBMC'
+		end
+		
+		if luup.io.intercept()==false then
+			log("Cannot connect. Confirm the IP address is correct.")
+			return false,'Cannot connect. Confirm the IP address is correct.','XBMC'
+		end
+		
+		luup.call_timer("scheduled_ping", 1, ping_interval, "", "")
+		
+		log("startup complete: " .. tostring(lul_device))
+		
+		return true,'ok','XBMC'
 	end
   </functions>
   <startup>init</startup>
+    <incoming>
+    <lua>
+        XBMC_processIncoming(tostring(lul_data))
+    </lua>
+  </incoming>
   <actionList>
-	
     <action>
       <serviceId>urn:upnp-org:serviceId:XBMC1</serviceId>
       <name>GetPlayerStatus</name>
       <run>
-        luup.variable_get(serviceid, "PlayerStatus", lul_device)
+        getPlayerStatus()
       </run>
     </action>
     <action>
       <serviceId>urn:upnp-org:serviceId:XBMC1</serviceId>
       <name>SetPlayerStatus</name>
       <run>
-        luup.variable_set(serviceid, "PlayerStatus", lul_settings.newPlayerStatus, lul_device)
+        setPlayerStatus(lul_settings.newPlayerStatus)
       </run>
     </action>
 	<action>
