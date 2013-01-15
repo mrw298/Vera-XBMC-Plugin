@@ -293,9 +293,9 @@
 	function init(lul_device)
 		ipAddress = luup.devices[lul_device].ip
 		
-		json_tcp_port = readVariableOrInit(PARENT_DEVICE, XBMC_SID, "XBMC_TCP_port", DEFAULT_XBMC_TCP_PORT)
-		json_http_port = readVariableOrInit(PARENT_DEVICE, XBMC_SID, "XBMC_HTTP_port", DEFAULT_XBMC_HTTP_PORT)		
-		ping_interval = readVariableOrInit(PARENT_DEVICE, XBMC_SID, "PingInterval", DEFAULT_PING_TIME)
+		json_tcp_port = readVariableOrInit(lul_device, serviceid, "XBMC_TCP_port", DEFAULT_XBMC_TCP_PORT)
+		json_http_port = readVariableOrInit(lul_device, serviceid, "XBMC_HTTP_port", DEFAULT_XBMC_HTTP_PORT)		
+		ping_interval = readVariableOrInit(lul_device, serviceid, "PingInterval", DEFAULT_PING_TIME)
 
 		log("starting device: " .. tostring(lul_device))
 
