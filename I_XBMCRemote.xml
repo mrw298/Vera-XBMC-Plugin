@@ -410,9 +410,9 @@
 		log("Connecting to XBMC host on: " .. ipAddress .. ":" .. json_tcp_port )
 		luup.io.open(lul_device, ipAddress, json_tcp_port)
 		
-		if (luup.io.intercept() == false) then
+		if (luup.io.is_connected(lul_device) == false) then
 			log("Cannot connect. Confirm the IP address is correct, will attempt to reconnect in scheduled ping.")
-			task( "couldn't connect", TASK_ERROR )
+			-- task( "couldn't connect", TASK_ERROR )
 		else
 			log("connected to XBMC succesfully")
 		end
