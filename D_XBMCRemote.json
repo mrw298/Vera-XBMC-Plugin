@@ -1036,7 +1036,7 @@
 	  {
             "id": 3,
             "label": {
-                "lang_tag": "bidle_time_goes_below",
+                "lang_tag": "idle_time_goes_below",
                 "text": "Idle Time Goes Below"
             },
             "serviceId": "urn:upnp-org:serviceId:XBMC1",
@@ -1064,7 +1064,7 @@
 		{
             "id": 4,
             "label": {
-                "lang_tag": "bidle_time_goes_above",
+                "lang_tag": "idle_time_goes_above",
                 "text": "Idle Time Goes Above"
             },
             "serviceId": "urn:upnp-org:serviceId:XBMC1",
