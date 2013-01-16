@@ -47,27 +47,51 @@
                "scenegroup":"4",
                "x":"0",
                "y":"0"
+            },
+            {
+               "id":"6",
+               "isSingle":"1",
+               "scenegroup":"5",
+               "x":"0",
+               "y":"0"
+            },
+            {
+               "id":"7",
+               "isSingle":"1",
+               "scenegroup":"6",
+               "x":"0",
+               "y":"0"
             }
          ],
          "SceneGroup":[
             {
                "id":"1",
-               "top":"1.6",
+               "top":"1.3",
                "left":"0"
             },
             {
                "id":"2",
-               "top":"1.6",
+               "top":"1.3",
                "left":"1"
             },
             {
                "id":"3",
-               "top":"2.2",
+               "top":"1.9",
                "left":"0"
             },
             {
                "id":"4",
-               "top":"2.2",
+               "top":"1.9",
+               "left":"1"
+            },
+            {
+               "id":"5",
+               "top":"2.5",
+               "left":"0"
+            },
+            {
+               "id":"6",
+               "top":"2.5",
                "left":"1"
             }
          ],
@@ -77,6 +101,7 @@
                "ControlType":"label",
                "top":"0",
                "left":"0",
+			   "text_align": "left",
                "Label":{
                   "lang_tag":"vname",
                   "text":"Variable Name:"
@@ -93,6 +118,7 @@
                "ControlType":"label",
                "top":"0",
                "left":"0",
+			   "text_align": "left",
                "Label":{
                   "lang_tag":"vvalue",
                   "text":"Variable Value:"
@@ -109,6 +135,7 @@
                "ControlType":"label",
                "top":"0",
                "left":"0",
+			   "text_align": "left",
                "Label":{
                   "lang_tag":"pingstatustitle",
                   "text":"PingState:"
@@ -125,6 +152,7 @@
                "ControlType":"label",
                "top":"0",
                "left":"0",
+			   "text_align": "left",
                "Label":{
                   "lang_tag":"playstatustitle",
                   "text":"PlayState:"
@@ -141,6 +169,7 @@
                "ControlType":"variable",
                "top":"0",
                "left":"0",
+			   "text_align": "left",
                "Display":{
                   "Service":"urn:upnp-org:serviceId:XBMC1",
                   "Variable":"PlayerStatus",
@@ -155,6 +184,7 @@
                "ControlType":"variable",
                "top":"0",
                "left":"0",
+			   "text_align": "left",
                "Display":{
                   "Service":"urn:upnp-org:serviceId:XBMC1",
                   "Variable":"PingStatus",
@@ -169,6 +199,7 @@
                "ControlType":"label",
                "top":"0",
                "left":"0",
+			   "text_align": "left",
                "Label":{
                   "lang_tag":"playstatustitle",
                   "text":"Idle Time:"
@@ -185,6 +216,7 @@
                "ControlType":"variable",
                "top":"0",
                "left":"0",
+			   "text_align": "left",
                "Display":{
                   "Service":"urn:upnp-org:serviceId:XBMC1",
                   "Variable":"IdleTime",
@@ -832,6 +864,58 @@
                   "Left":50,
                   "Width":75,
                   "Height":20
+               }
+            },
+            {
+               "ControlGroup":"51",
+               "ControlType":"button",
+               "top":"0",
+               "left":"0",
+               "Label":{
+                  "lang_tag":"cmd_vup",
+                  "text":"Vol. Up"
+               },
+               "Display":{
+                  "Top":160,
+                  "Left":500,
+                  "Width":80,
+                  "Height":20
+               },
+               "Command":{
+                  "Service":"urn:upnp-org:serviceId:XBMC1",
+                  "Action":"XBMCall",
+                  "Parameters":[
+                     {
+                        "Name":"action",
+                        "Value":"vup"
+                     }
+                  ]
+               }
+            },
+            {
+               "ControlGroup":"52",
+               "ControlType":"button",
+               "top":"0",
+               "left":"0",
+               "Label":{
+                  "lang_tag":"cmd_vdown",
+                  "text":"Vol. Down"
+               },
+               "Display":{
+                  "Top":190,
+                  "Left":500,
+                  "Width":80,
+                  "Height":20
+               },
+               "Command":{
+                  "Service":"urn:upnp-org:serviceId:XBMC1",
+                  "Action":"XBMCall",
+                  "Parameters":[
+                     {
+                        "Name":"action",
+                        "Value":"vdown"
+                     }
+                  ]
                }
             }
          ]
