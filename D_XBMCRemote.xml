@@ -8,7 +8,7 @@
     <deviceType>urn:schemas-upnp-org:device:XBMC:1</deviceType>
     <staticJson>D_XBMCRemote.json</staticJson> 
     <friendlyName>XBMCRemote</friendlyName>
-    <manufacturer>chixxi</manufacturer>
+    <manufacturer>chixxi+mrw298</manufacturer>
     <manufacturerURL></manufacturerURL>
     <modelDescription>XBMCRemote</modelDescription>
     <modelName>XBMCRemote</modelName>

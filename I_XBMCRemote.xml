@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <implementation>
   <functions>
-	local dkjson = require("L_GoogleLatitude_dkjson")
+	local dkjson = require("L_XBMCRemote_dkjson")
   
   	local ipAddress
 	local json_http_port
@@ -17,7 +17,6 @@
 	local DEFAULT_PING_TIME = 18
 	
 	local SOON = 5
-	
 	
 	local taskHandle = -1
     local TASK_ERROR = 2
@@ -87,16 +86,6 @@
 	end
 	
 	-- Logic starts
-	
- 	function curlcall (meth, para)
-		--debug("CURLCALL: port: " .. json_http_port .. " meth: " ..meth .. " para: " ..para .. " ip: " ..ipAddress)
-		
-		curlcommand = "curl -i -X POST -d '{\"jsonrpc\": \"4.0\", \"method\": \"" .. meth .. "\", \"params\": {" .. para .. "}, \"id\": 1}' http://" .. ipAddress .. ":" .. json_http_port .. "/jsonrpc"
-		debug("CURLCALL COMMAND: " .. curlcommand)
-		
-		curlresponse = os.execute(curlcommand)
-		debug("CURLCALL ANSWER: " .. curlresponse)
-	end
 	
 	function xbmc_json_call( meth, para )
 		--local cmd = '{"jsonrpc": "2.0", "method": "" .. meth .. "", "params": {" .. para .. "}, "id": 1}'
