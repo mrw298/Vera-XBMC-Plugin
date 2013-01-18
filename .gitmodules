@@ -1,0 +1,3 @@
+[submodule "core"]
+	path = mocks/core
+	url = https://github.com/mrw298/Vera-Plugin-Mocks.git
