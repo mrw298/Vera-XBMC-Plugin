@@ -88,12 +88,12 @@ end
 
 -- Logic starts
 
-function xbmc_json_call( meth, para )
+function xbmc_json_call( meth, para, msg_id )
 	--local cmd = '{"jsonrpc": "2.0", "method": "" .. meth .. "", "params": {" .. para .. "}, "id": 1}'
 	
 	local request = {
 						jsonrpc = "2.0";
-						id = "1";
+						id = msg_id or "1";
 					}
 					
 	if meth ~= nil then request.method = meth end
@@ -283,7 +283,7 @@ local function JSONRPC_Process_Coroutine(ch)
 					if (next_ch == "{") then open_braces_found = open_braces_found + 1 end
 					if (next_ch == "}") then open_braces_found = open_braces_found - 1 end
 
-					if ( open_braces_found &lt;= 0 ) then break end
+					if ( open_braces_found <= 0 ) then break end
 
 				end
 		end
@@ -361,6 +361,29 @@ local function XBMC_processNotification( method, params)
 		debug( "Player state is: " .. state )
 		
 		setPlayerStatus( state )
+		
+		if (state == "OnPlay" ) then 
+			-- in here send a request for more information on what's playing
+			-- then process it in the event handler
+			
+			if (params.data ~= nil) and (params.data.item ~= nil) and (params.data.player ~= nil) then
+				local item = params.data.item
+				local player = params.data.player
+				
+				local new_method = "Player.GetItem"
+				local new_params = {
+					properties = { "title" };
+					playerid = player.playerid;
+				}
+				
+				-- buffer any new data
+				xbmc_json_call( new_method, new_params, "GetWhatsPlaying" )				
+			
+			end
+			
+		elseif ( state == "OnStop") then
+			writeVariableIfChanged(lul_device, serviceid, "CurrentPlaying", "--")
+		end
 	end
 	
 end
@@ -381,6 +404,14 @@ local function XBMC_processIncomingMessage(msg)
 	if( oMsg.id == nil) and (oMsg.method ~= nil) then
 		debug( "found a notification" )
 		XBMC_processNotification( oMsg.method, oMsg.params )
+	elseif ( oMsg.id == "GetWhatsPlaying" ) and (oMsg.result ~= nil) and (oMsg.result.item ~= nil) then
+		-- abuse the ID flag to maintain state as GetItem is a generic response
+		local item = oMsg.result.item
+		
+		if ( item.type ~= nil) and (item.title ~= nil) then
+			local playing = item.type .. ": " .. item.title
+			writeVariableIfChanged(lul_device, serviceid, "CurrentPlaying", playing )
+		end
 	else
 		debug( "unhandled message type" )
 	end
@@ -388,7 +419,7 @@ end
 
 
 	-- processed byte by byte
-local function processIncoming(s)
+function processIncoming(s)
 	if (luup.is_ready(PARENT_DEVICE) == false) then
 		return
 	end
@@ -413,7 +444,7 @@ function xbmc_connect()
 end
 
 
-function init(parentDevice)
+function init(lul_device)
 		ipAddress = luup.devices[lul_device].ip
 		
 		json_tcp_port = readVariableOrInit(lul_device, serviceid, "XBMC_TCP_port", DEFAULT_XBMC_TCP_PORT)
@@ -429,6 +460,7 @@ function init(parentDevice)
 			local PingStatus1 = readVariableOrInit( lul_device, serviceid, "PingStatus", "--")
 			local IdleTime1 = readVariableOrInit( lul_device, serviceid, "IdleTime", "--")
 			local PlayerStatus1 = readVariableOrInit( lul_device, serviceid, "PlayerStatus", "--")
+			local CurrentPlaying = readVariableOrInit( lul_device, serviceid, "CurrentPlaying", "--")
 		end
 		
 		if (ipAddress ~= "") and (json_tcp_port ~= "") then
