@@ -21,87 +21,67 @@
          "TabType":"flash",
          "ControlGroup":[
             {
-               "id":"2",
-               "isSingle":"1",
-               "scenegroup":"1",
-               "x":"0",
-               "y":"0"
+               "id":"102",
+               "scenegroup":"151"
             },
             {
-               "id":"5",
-               "isSingle":"1",
-               "scenegroup":"2",
-               "x":"0",
-               "y":"0"
+               "id":"105",
+               "scenegroup":"152"
             },
             {
-               "id":"3",
-               "isSingle":"1",
-               "scenegroup":"3",
-               "x":"0",
-               "y":"0"
+               "id":"103",
+               "scenegroup":"153"
             },
             {
-               "id":"4",
-               "isSingle":"1",
-               "scenegroup":"4",
-               "x":"0",
-               "y":"0"
+               "id":"106",
+               "scenegroup":"154"
             },
             {
-               "id":"6",
-               "isSingle":"1",
-               "scenegroup":"5",
-               "x":"0",
-               "y":"0"
+               "id":"104",
+               "scenegroup":"155"
             },
             {
-               "id":"7",
-               "isSingle":"1",
-               "scenegroup":"6",
-               "x":"0",
-               "y":"0"
+               "id":"107",
+               "scenegroup":"156"
             }
          ],
          "SceneGroup":[
             {
-               "id":"1",
+               "id":"151",
                "top":"1.3",
                "left":"0"
             },
             {
-               "id":"2",
+               "id":"152",
                "top":"1.3",
                "left":"1"
             },
             {
-               "id":"3",
+               "id":"153",
                "top":"1.9",
                "left":"0"
             },
             {
-               "id":"4",
+               "id":"154",
                "top":"1.9",
                "left":"1"
             },
             {
-               "id":"5",
+               "id":"155",
                "top":"2.5",
                "left":"0"
             },
             {
-               "id":"6",
+               "id":"156",
                "top":"2.5",
                "left":"1"
             }
          ],
          "Control":[
             {
-               "ControlGroup":"0",
+               "ControlGroup":"100",
                "ControlType":"label",
-               "top":"0",
-               "left":"0",
-			   "text_align": "left",
+               "text_align":"left",
                "Label":{
                   "lang_tag":"vname",
                   "text":"Variable Name:"
@@ -114,11 +94,9 @@
                }
             },
             {
-               "ControlGroup":"1",
+               "ControlGroup":"101",
                "ControlType":"label",
-               "top":"0",
-               "left":"0",
-			   "text_align": "left",
+               "text_align":"left",
                "Label":{
                   "lang_tag":"vvalue",
                   "text":"Variable Value:"
@@ -131,11 +109,9 @@
                }
             },
             {
-               "ControlGroup":"2",
+               "ControlGroup":"102",
                "ControlType":"label",
-               "top":"0",
-               "left":"0",
-			   "text_align": "left",
+               "text_align":"left",
                "Label":{
                   "lang_tag":"pingstatustitle",
                   "text":"PingState:"
@@ -148,11 +124,9 @@
                }
             },
             {
-               "ControlGroup":"3",
+               "ControlGroup":"103",
                "ControlType":"label",
-               "top":"0",
-               "left":"0",
-			   "text_align": "left",
+               "text_align":"left",
                "Label":{
                   "lang_tag":"playstatustitle",
                   "text":"PlayState:"
@@ -165,43 +139,11 @@
                }
             },
             {
-               "ControlGroup":"4",
-               "ControlType":"variable",
-               "top":"0",
-               "left":"0",
-			   "text_align": "left",
-               "Display":{
-                  "Service":"urn:upnp-org:serviceId:XBMC1",
-                  "Variable":"PlayerStatus",
-                  "Top":80,
-                  "Left":175,
-                  "Width":75,
-                  "Height":20
-               }
-            },
-            {
-               "ControlGroup":"5",
-               "ControlType":"variable",
-               "top":"0",
-               "left":"0",
-			   "text_align": "left",
-               "Display":{
-                  "Service":"urn:upnp-org:serviceId:XBMC1",
-                  "Variable":"PingStatus",
-                  "Top":55,
-                  "Left":175,
-                  "Width":75,
-                  "Height":20
-               }
-            },
-			{
-               "ControlGroup":"6",
+               "ControlGroup":"104",
                "ControlType":"label",
-               "top":"0",
-               "left":"0",
-			   "text_align": "left",
+               "text_align":"left",
                "Label":{
-                  "lang_tag":"playstatustitle",
+                  "lang_tag":"idletimetitle",
                   "text":"Idle Time:"
                },
                "Display":{
@@ -212,11 +154,35 @@
                }
             },
             {
-               "ControlGroup":"7",
+               "ControlGroup":"105",
                "ControlType":"variable",
-               "top":"0",
-               "left":"0",
-			   "text_align": "left",
+               "text_align":"left",
+               "Display":{
+                  "Service":"urn:upnp-org:serviceId:XBMC1",
+                  "Variable":"PingStatus",
+                  "Top":55,
+                  "Left":175,
+                  "Width":75,
+                  "Height":20
+               }
+            }, 
+			{
+               "ControlGroup":"106",
+               "ControlType":"variable",
+               "text_align":"left",
+               "Display":{
+                  "Service":"urn:upnp-org:serviceId:XBMC1",
+                  "Variable":"PlayerStatus",
+                  "Top":80,
+                  "Left":175,
+                  "Width":75,
+                  "Height":20
+               }
+            },
+            {
+               "ControlGroup":"107",
+               "ControlType":"variable",
+               "text_align":"left",
                "Display":{
                   "Service":"urn:upnp-org:serviceId:XBMC1",
                   "Variable":"IdleTime",
@@ -237,10 +203,8 @@
          "TabType":"flash",
          "Control":[
             {
-               "ControlGroup":"10",
+               "ControlGroup":"201",
                "ControlType":"button",
-               "top":"0",
-               "left":"1",
                "Label":{
                   "lang_tag":"cmd_left",
                   "text":"⇐"
@@ -263,10 +227,8 @@
                }
             },
             {
-               "ControlGroup":"11",
+               "ControlGroup":"202",
                "ControlType":"button",
-               "top":"0",
-               "left":"0",
                "Label":{
                   "lang_tag":"cmd_right",
                   "text":"⇒"
@@ -289,10 +251,8 @@
                }
             },
             {
-               "ControlGroup":"12",
+               "ControlGroup":"203",
                "ControlType":"button",
-               "top":"0",
-               "left":"1",
                "Label":{
                   "lang_tag":"cmd_up",
                   "text":"⇑"
@@ -315,10 +275,8 @@
                }
             },
             {
-               "ControlGroup":"13",
+               "ControlGroup":"204",
                "ControlType":"button",
-               "top":"0",
-               "left":"0",
                "Label":{
                   "lang_tag":"cmd_down",
                   "text":"⇓"
@@ -341,10 +299,8 @@
                }
             },
             {
-               "ControlGroup":"14",
+               "ControlGroup":"205",
                "ControlType":"button",
-               "top":"0",
-               "left":"0",
                "Label":{
                   "lang_tag":"cmd_ok",
                   "text":"OK"
@@ -367,10 +323,8 @@
                }
             },
             {
-               "ControlGroup":"15",
+               "ControlGroup":"206",
                "ControlType":"button",
-               "top":"0",
-               "left":"0",
                "Label":{
                   "lang_tag":"cmd_play",
                   "text":"Play"
@@ -393,10 +347,8 @@
                }
             },
             {
-               "ControlGroup":"16",
+               "ControlGroup":"207",
                "ControlType":"button",
-               "top":"0",
-               "left":"0",
                "Label":{
                   "lang_tag":"cmd_pause",
                   "text":"Pause"
@@ -419,10 +371,8 @@
                }
             },
             {
-               "ControlGroup":"17",
+               "ControlGroup":"208",
                "ControlType":"button",
-               "top":"0",
-               "left":"0",
                "Label":{
                   "lang_tag":"cmd_stop",
                   "text":"Stop"
@@ -445,10 +395,8 @@
                }
             },
             {
-               "ControlGroup":"18",
+               "ControlGroup":"209",
                "ControlType":"button",
-               "top":"0",
-               "left":"0",
                "Label":{
                   "lang_tag":"cmd_slower",
                   "text":"<<"
@@ -471,10 +419,8 @@
                }
             },
             {
-               "ControlGroup":"19",
+               "ControlGroup":"210",
                "ControlType":"button",
-               "top":"0",
-               "left":"0",
                "Label":{
                   "lang_tag":"cmd_prev",
                   "text":"<"
@@ -497,10 +443,8 @@
                }
             },
             {
-               "ControlGroup":"20",
+               "ControlGroup":"211",
                "ControlType":"button",
-               "top":"0",
-               "left":"0",
                "Label":{
                   "lang_tag":"cmd_next",
                   "text":">"
@@ -523,10 +467,8 @@
                }
             },
             {
-               "ControlGroup":"21",
+               "ControlGroup":"212",
                "ControlType":"button",
-               "top":"0",
-               "left":"0",
                "Label":{
                   "lang_tag":"cmd_faster",
                   "text":">>"
@@ -549,10 +491,8 @@
                }
             },
             {
-               "ControlGroup":"26",
+               "ControlGroup":"213",
                "ControlType":"button",
-               "top":"0",
-               "left":"0",
                "Label":{
                   "lang_tag":"cmd_setup",
                   "text":"Mute"
@@ -575,10 +515,8 @@
                }
             },
             {
-               "ControlGroup":"27",
+               "ControlGroup":"214",
                "ControlType":"button",
-               "top":"0",
-               "left":"0",
                "Label":{
                   "lang_tag":"cmd_home",
                   "text":"Home"
@@ -601,10 +539,8 @@
                }
             },
             {
-               "ControlGroup":"28",
+               "ControlGroup":"215",
                "ControlType":"button",
-               "top":"0",
-               "left":"0",
                "Label":{
                   "lang_tag":"cmd_return",
                   "text":"Back"
@@ -627,10 +563,8 @@
                }
             },
             {
-               "ControlGroup":"31",
+               "ControlGroup":"216",
                "ControlType":"button",
-               "top":"0",
-               "left":"0",
                "Label":{
                   "lang_tag":"cmd_reboot",
                   "text":"Reboot"
@@ -653,10 +587,8 @@
                }
             },
             {
-               "ControlGroup":"32",
+               "ControlGroup":"217",
                "ControlType":"button",
-               "top":"0",
-               "left":"0",
                "Label":{
                   "lang_tag":"cmd_suspend",
                   "text":"Suspend"
@@ -679,10 +611,8 @@
                }
             },
             {
-               "ControlGroup":"33",
+               "ControlGroup":"218",
                "ControlType":"button",
-               "top":"0",
-               "left":"0",
                "Label":{
                   "lang_tag":"cmd_shutdown",
                   "text":"Shutdown"
@@ -705,10 +635,8 @@
                }
             },
             {
-               "ControlGroup":"33",
+               "ControlGroup":"219",
                "ControlType":"button",
-               "top":"0",
-               "left":"0",
                "Label":{
                   "lang_tag":"cmd_on",
                   "text":"ON"
@@ -731,10 +659,8 @@
                }
             },
             {
-               "ControlGroup":"36",
+               "ControlGroup":"220",
                "ControlType":"label",
-               "top":"0",
-               "left":"0",
                "Label":{
                   "lang_tag":"vlibrarytitleaudio",
                   "text":"Audio Library:"
@@ -747,10 +673,8 @@
                }
             },
             {
-               "ControlGroup":"37",
+               "ControlGroup":"221",
                "ControlType":"button",
-               "top":"0",
-               "left":"0",
                "Label":{
                   "lang_tag":"cmd_audioupdate",
                   "text":"Update"
@@ -773,10 +697,8 @@
                }
             },
             {
-               "ControlGroup":"38",
+               "ControlGroup":"223",
                "ControlType":"button",
-               "top":"0",
-               "left":"0",
                "Label":{
                   "lang_tag":"cmd_audioclean",
                   "text":"Clean"
@@ -799,10 +721,8 @@
                }
             },
             {
-               "ControlGroup":"39",
+               "ControlGroup":"224",
                "ControlType":"button",
-               "top":"0",
-               "left":"0",
                "Label":{
                   "lang_tag":"cmd_videoupdate",
                   "text":"Update"
@@ -825,10 +745,8 @@
                }
             },
             {
-               "ControlGroup":"40",
+               "ControlGroup":"225",
                "ControlType":"button",
-               "top":"0",
-               "left":"0",
                "Label":{
                   "lang_tag":"cmd_videoclean",
                   "text":"Clean"
@@ -851,10 +769,8 @@
                }
             },
             {
-               "ControlGroup":"50",
+               "ControlGroup":"226",
                "ControlType":"label",
-               "top":"0",
-               "left":"0",
                "Label":{
                   "lang_tag":"vlibrarytitlevideo",
                   "text":"Video Library:"
@@ -867,10 +783,8 @@
                }
             },
             {
-               "ControlGroup":"51",
+               "ControlGroup":"227",
                "ControlType":"button",
-               "top":"0",
-               "left":"0",
                "Label":{
                   "lang_tag":"cmd_vup",
                   "text":"Vol. Up"
@@ -893,10 +807,8 @@
                }
             },
             {
-               "ControlGroup":"52",
+               "ControlGroup":"228",
                "ControlType":"button",
-               "top":"0",
-               "left":"0",
                "Label":{
                   "lang_tag":"cmd_vdown",
                   "text":"Vol. Down"
@@ -933,7 +845,7 @@
    ],
    "eventList2":[
       {
-         "id":1,
+         "id":300,
          "label":{
             "lang_tag":"player_state_changes",
             "text":"Player State Changes"
@@ -941,7 +853,7 @@
          "serviceId":"urn:upnp-org:serviceId:XBMC1",
          "argumentList":[
             {
-               "id":1,
+               "id":301,
                "dataType":"string",
                "defaultValue":"--",
                "allowedValueList":[
@@ -994,7 +906,7 @@
          ]
       },
       {
-         "id":2,
+         "id":302,
          "label":{
             "lang_tag":"ping_state_changes",
             "text":"Ping State Changes"
@@ -1002,7 +914,7 @@
          "serviceId":"urn:upnp-org:serviceId:XBMC1",
          "argumentList":[
             {
-               "id":2,
+               "id":303,
                "dataType":"string",
                "defaultValue":"--",
                "allowedValueList":[
@@ -1033,62 +945,62 @@
             }
          ]
       },
-	  {
-            "id": 3,
-            "label": {
-                "lang_tag": "idle_time_goes_below",
-                "text": "Idle Time Goes Below"
-            },
-            "serviceId": "urn:upnp-org:serviceId:XBMC1",
-            "argumentList": [
-                {
-                    "id": 3,
-                    "prefix": {
-						"lang_tag":"Minutes",
-						"text":"Minutes:"
-					},
-                    "dataType": "i4",
-                    "name": "IdleTime",
-                    "comparisson": "<",
-                    "suffix": {
-						"lang_tag":"minutes_sign",
-						"text":"min"
-					},
-                    "HumanFriendlyText": {
-                        "lang_tag": "idletime_goes_below",
-                        "text": "Idle Time for _DEVICE_NAME_ goes below _ARGUMENT_VALUE_ minutes."
-                    }
-                }
-            ]
-        },
-		{
-            "id": 4,
-            "label": {
-                "lang_tag": "idle_time_goes_above",
-                "text": "Idle Time Goes Above"
-            },
-            "serviceId": "urn:upnp-org:serviceId:XBMC1",
-            "argumentList": [
-                {
-                    "id": 4,
-                    "prefix": {
-						"lang_tag":"Minutes",
-						"text":"Minutes:"
-					},
-                    "dataType": "i4",
-                    "name": "IdleTime",
-                    "comparisson": ">",
-                    "suffix": {
-						"lang_tag":"minutes_sign",
-						"text":"min"
-					},
-                    "HumanFriendlyText": {
-                        "lang_tag": "idletime_goes_above",
-                        "text": "Idle Time for _DEVICE_NAME_ goes below _ARGUMENT_VALUE_ minutes."
-                    }
-                }
-            ]
-        }
+      {
+         "id":304,
+         "label":{
+            "lang_tag":"idle_time_goes_below",
+            "text":"Idle Time Goes Below"
+         },
+         "serviceId":"urn:upnp-org:serviceId:XBMC1",
+         "argumentList":[
+            {
+               "id":305,
+               "prefix":{
+                  "lang_tag":"Minutes",
+                  "text":"Minutes:"
+               },
+               "dataType":"i4",
+               "name":"IdleTime",
+               "comparisson":"<",
+               "suffix":{
+                  "lang_tag":"minutes_sign",
+                  "text":"min"
+               },
+               "HumanFriendlyText":{
+                  "lang_tag":"idletime_goes_below",
+                  "text":"Idle Time for _DEVICE_NAME_ goes below _ARGUMENT_VALUE_ minutes."
+               }
+            }
+         ]
+      },
+      {
+         "id":306,
+         "label":{
+            "lang_tag":"idle_time_goes_above",
+            "text":"Idle Time Goes Above"
+         },
+         "serviceId":"urn:upnp-org:serviceId:XBMC1",
+         "argumentList":[
+            {
+               "id":307,
+               "prefix":{
+                  "lang_tag":"Minutes",
+                  "text":"Minutes:"
+               },
+               "dataType":"i4",
+               "name":"IdleTime",
+               "comparisson":">",
+               "suffix":{
+                  "lang_tag":"minutes_sign",
+                  "text":"min"
+               },
+               "HumanFriendlyText":{
+                  "lang_tag":"idletime_goes_above",
+                  "text":"Idle Time for _DEVICE_NAME_ goes below _ARGUMENT_VALUE_ minutes."
+               }
+            }
+         ]
+      }
    ],
    "DeviceType":"urn:schemas-upnp-org:device:XBMC:1",
    "device_type":"urn:schemas-upnp-org:device:XBMC:1"

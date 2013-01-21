@@ -1,9 +1,7 @@
 <?xml version="1.0"?>
 <implementation>
   <functions>
-
 	local XBMCRemote 
-
 	
 	function scheduled_ping()
 		XBMCRemote.scheduled_ping()
