@@ -154,6 +154,34 @@
                }
             },
             {
+               "ControlGroup":"110",
+               "ControlType":"label",
+               "text_align":"left",
+               "Label":{
+                  "lang_tag":"playing",
+                  "text":"Currently Playing:"
+               },
+               "Display":{
+                  "Top":130,
+                  "Left":50,
+                  "Width":75,
+                  "Height":20
+               }
+            },
+            {
+               "ControlGroup":"111",
+               "ControlType":"variable",
+               "text_align":"left",
+               "Display":{
+                  "Service":"urn:upnp-org:serviceId:XBMC1",
+                  "Variable":"CurrentPlaying",
+                  "Top":130,
+                  "Left":175,
+                  "Width":75,
+                  "Height":20
+               }
+            },
+            {
                "ControlGroup":"105",
                "ControlType":"variable",
                "text_align":"left",
@@ -858,38 +886,38 @@
                "defaultValue":"--",
                "allowedValueList":[
                   {
-                     "Started":"Started",
+                     "OnPlay":"OnPlay",
                      "HumanFriendlyText":{
                         "lang_tag":"playbackstarted",
-                        "text":"Playback is Started"
+                        "text":"OnPlay"
                      }
                   },
                   {
-                     "Ended":"Ended",
+                     "OnStop":"OnEnd",
                      "HumanFriendlyText":{
                         "lang_tag":"playbackended",
-                        "text":"Playback is Ended"
+                        "text":"OnEnd"
                      }
                   },
                   {
-                     "Stopped":"Stopped",
+                     "OnStop":"OnStop",
                      "HumanFriendlyText":{
                         "lang_tag":"playbackstopped",
-                        "text":"Playback is Stopped"
+                        "text":"OnStop"
                      }
                   },
                   {
-                     "Paused":"Paused",
+                     "OnPause":"OnPause",
                      "HumanFriendlyText":{
                         "lang_tag":"playbackpaused",
-                        "text":"Playback is Paused"
+                        "text":"OnPause"
                      }
                   },
                   {
-                     "Resumed":"Resumed",
+                     "OnResume":"OnResume",
                      "HumanFriendlyText":{
                         "lang_tag":"playbackresumed",
-                        "text":"Playback is Resumed"
+                        "text":"OnResume"
                      }
                   }
                ],
@@ -922,14 +950,14 @@
                      "Started":"PingStatusUp",
                      "HumanFriendlyText":{
                         "lang_tag":"pingstatusup",
-                        "text":"Up"
+                        "text":"up"
                      }
                   },
                   {
                      "Ended":"PingStatusDown",
                      "HumanFriendlyText":{
                         "lang_tag":"pingstatusdown",
-                        "text":"Down"
+                        "text":"down"
                      }
                   }
                ],
