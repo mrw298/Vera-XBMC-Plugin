@@ -3,19 +3,22 @@ _VERSION = "0.0.2"
 _COPYRIGHT = ""
 
 local dkjson = require("L_XBMCRemote_dkjson")
+local socket = require("socket")
+
 
 local ipAddress
 local json_http_port
 local json_tcp_port
 local ping_interval
 local serviceid = "urn:upnp-org:serviceId:XBMC1"
-local deviceid = lul_device
+local deviceid
 	
 local DEBUG_MODE = true
 
 local DEFAULT_XBMC_TCP_PORT = 9090
 local DEFAULT_XBMC_HTTP_PORT = 80
 local DEFAULT_PING_TIME = 18
+local DEFAULT_UPDATE_IDLE_TIME = 15
 
 local SOON = 5
 
@@ -84,6 +87,17 @@ end
 
 function string.ends(String,End)
 	return End=='' or string.sub(String,-string.len(End))==End
+end
+
+local function icmp_ping(address)
+  local returnCode = os.execute("ping -c 1 " .. address)
+
+  if (returnCode == 0) then
+	-- everything is fine, we reached the host
+	return true
+  else
+	return false
+  end
 end
 
 -- Logic starts
@@ -236,7 +250,7 @@ function XBMCall (action)
 		params = {
 			volume = "0";
 		}
-
+	
 	--ERROR
 	else
 		debug("XBMCall Command not found! action: " .. action)		
@@ -305,30 +319,92 @@ function xbmc_ping()
 	return result
 end
 
+function xbmc_getActivePlayers()
+	method = "Player.GetActivePlayers"
+	
+	return xbmc_json_call( method, nil, "GetActivePlayers" )		
+end
+
+function getStopTime()
+	return luup.variable_get(serviceid, "StopTime", deviceid)
+end
+
+function setStopTime(stop_time)
+	return writeVariableIfChanged(deviceid, serviceid, "StopTime", stop_time)
+end
+
 function getPlayerStatus()
-	return luup.variable_get(serviceid, "PlayerStatus", lul_device)
+	return luup.variable_get(serviceid, "PlayerStatus", deviceid)
 end
 
 function setPlayerStatus(status)
-	return writeVariableIfChanged(lul_device, serviceid, "PlayerStatus", status)
+
+	local current_StopTime = getStopTime()
+
+	if ((status == "OnStop") or (status == "OnEnded")) and (current_StopTime == "--") then
+		setStopTime( socket.gettime() )
+	elseif (status == "OnPlay") or (status == "--") then
+		setStopTime( "--" )
+		set_idle_time( "--" )
+	end
+
+	return writeVariableIfChanged(deviceid, serviceid, "PlayerStatus", status)
 end
 
 -- regular ping
 function scheduled_ping_ok()
-	writeVariableIfChanged(lul_device, serviceid, "PingStatus", "up")
+	writeVariableIfChanged(deviceid, serviceid, "PingStatus", "up")
 end
 
 function scheduled_ping_fail()
-	writeVariableIfChanged(lul_device, serviceid, "PingStatus", "down")
+	writeVariableIfChanged(deviceid, serviceid, "PingStatus", "down")
 	setPlayerStatus("--")
-	writeVariableIfChanged(lul_device, serviceid, "IdleTime", "--")
+	set_idle_time("--")
+end
+
+function set_idle_time(idle_time)
+	return writeVariableIfChanged(deviceid, serviceid, "IdleTime", idle_time)
+end
+
+function get_idle_time()
+	return luup.variable_get(serviceid, "IdleTime", deviceid)
+end
+
+function update_idle_time()
+	local idle_time = "--"
+	local stop_time = getStopTime()
+	
+--	debug( "in update_idle_time - stop_time: " .. (stop_time or "nil") )
+	
+	if (stop_time ~= nil) and (tostring(stop_time) ~= "--") then
+		idle_time = socket.gettime() - stop_time
+		set_idle_time(idle_time)
+	else
+		set_idle_time("--")
+	end
+	
+	-- call update_idle_time again
+	luup.call_timer("update_idle_time", 1, DEFAULT_UPDATE_IDLE_TIME, "", "")
 end
 
 function scheduled_ping()
 	log("sending routine ping")
+
+	-- do an icmp ping and if it fails don't attempt the rest of the connection
+	local ping = icmp_ping( ipAddress )
+	if ( ping == false ) then
+		debug("icmp ping failed")
+		
+		scheduled_ping_fail()
+		
+		-- just reschedule the ping
+		luup.call_timer("scheduled_ping", 1, ping_interval, "", "")
+		return false
+	end
+
 	
 	-- check whether we're still connected
-	if (luup.io.is_connected(lul_device) == false) then
+	if (luup.io.is_connected(deviceid) == false) then
 		scheduled_ping_fail()
 	
 		log( "io.is_connected is false - No longer connected in scheduled ping, attempt to reconnect")
@@ -339,8 +415,8 @@ function scheduled_ping()
 		return false			
 	end
 			
-
-	local result = xbmc_ping()
+	-- this really only checks we can send to a port
+	local result = xbmc_getActivePlayers()
 	if (result == true) then
 		scheduled_ping_ok()
 		debug("XBMCRemote is UP!")
@@ -382,7 +458,8 @@ local function XBMC_processNotification( method, params)
 			end
 			
 		elseif ( state == "OnStop") then
-			writeVariableIfChanged(lul_device, serviceid, "CurrentPlaying", "--")
+			-- dont think this is correct
+--			setPlayerStatus("--")
 		end
 	end
 	
@@ -410,7 +487,18 @@ local function XBMC_processIncomingMessage(msg)
 		
 		if ( item.type ~= nil) and (item.title ~= nil) then
 			local playing = item.type .. ": " .. item.title
-			writeVariableIfChanged(lul_device, serviceid, "CurrentPlaying", playing )
+			writeVariableIfChanged(deviceid, serviceid, "CurrentPlaying", playing )
+		end
+	elseif (oMsg.id == "GetActivePlayers") and (oMsg.result ~= nil) then
+		-- if the results variable is present but empty then nothing is playing
+		if (next(oMsg.result) == nil) then
+			debug( "nothing playing in GetActivePlayers")
+			setPlayerStatus("OnStop")
+		elseif (oMsg.result[1].playerid ~= nil) then
+			debug("found an active player")
+			setPlayerStatus("OnPlay")
+		else
+			debug( "unknown response to the GetActivePlayers request")
 		end
 	else
 		debug( "unhandled message type" )
@@ -420,7 +508,7 @@ end
 
 	-- processed byte by byte
 function processIncoming(s)
-	if (luup.is_ready(PARENT_DEVICE) == false) then
+	if (luup.is_ready(deviceid) == false) then
 		return
 	end
 
@@ -433,9 +521,9 @@ end
 
 function xbmc_connect()
 	log("Connecting to XBMC host on: " .. ipAddress .. ":" .. json_tcp_port )
-	luup.io.open(lul_device, ipAddress, json_tcp_port)
+	luup.io.open(deviceid, ipAddress, json_tcp_port)
 	
-	if (luup.io.is_connected(lul_device) == false) then
+	if (luup.io.is_connected(deviceid) == false) then
 		log("Cannot connect. Confirm the IP address is correct, will attempt to reconnect in scheduled ping.")
 		-- task( "couldn't connect", TASK_ERROR )
 	else
@@ -445,22 +533,24 @@ end
 
 
 function init(lul_device)
-		ipAddress = luup.devices[lul_device].ip
+		deviceid = lul_device
+		ipAddress = luup.devices[deviceid].ip
 		
-		json_tcp_port = readVariableOrInit(lul_device, serviceid, "XBMC_TCP_port", DEFAULT_XBMC_TCP_PORT)
-		json_http_port = readVariableOrInit(lul_device, serviceid, "XBMC_HTTP_port", DEFAULT_XBMC_HTTP_PORT)		
-		ping_interval = readVariableOrInit(lul_device, serviceid, "PingInterval", DEFAULT_PING_TIME)
+		json_tcp_port = readVariableOrInit(deviceid, serviceid, "XBMC_TCP_port", DEFAULT_XBMC_TCP_PORT)
+		json_http_port = readVariableOrInit(deviceid, serviceid, "XBMC_HTTP_port", DEFAULT_XBMC_HTTP_PORT)		
+		ping_interval = readVariableOrInit(deviceid, serviceid, "PingInterval", DEFAULT_PING_TIME)
 
-		log("starting device: " .. tostring(lul_device))
+		log("starting device: " .. tostring(deviceid))
 
 		
 		if (ipAddress == nil or ipAddress == "") then
 			return false, "IP Address is required in Device's Advanced Settings!", "XBMCRemote"
 		else
-			local PingStatus1 = readVariableOrInit( lul_device, serviceid, "PingStatus", "--")
-			local IdleTime1 = readVariableOrInit( lul_device, serviceid, "IdleTime", "--")
-			local PlayerStatus1 = readVariableOrInit( lul_device, serviceid, "PlayerStatus", "--")
-			local CurrentPlaying = readVariableOrInit( lul_device, serviceid, "CurrentPlaying", "--")
+			local PingStatus1 = readVariableOrInit( deviceid, serviceid, "PingStatus", "--")
+			local IdleTime1 = readVariableOrInit( deviceid, serviceid, "IdleTime", "--")
+			local StopTime1 = readVariableOrInit( deviceid, serviceid, "StopTime", "--")
+			local PlayerStatus1 = readVariableOrInit( deviceid, serviceid, "PlayerStatus", "--")
+			local CurrentPlaying = readVariableOrInit( deviceid, serviceid, "CurrentPlaying", "--")
 		end
 		
 		if (ipAddress ~= "") and (json_tcp_port ~= "") then
@@ -473,7 +563,10 @@ function init(lul_device)
 		log( "ping scheduled in " .. SOON .. " seconds" )
 		luup.call_timer("scheduled_ping", 1, SOON, "", "")
 		
-		log("startup complete: " .. tostring(lul_device))
+		log("update idle time scheduled every " .. DEFAULT_UPDATE_IDLE_TIME .. " seconds" )
+		luup.call_timer("update_idle_time", 1, DEFAULT_UPDATE_IDLE_TIME, "", "")
+		
+		log("startup complete: " .. tostring(deviceid))
 		
 		return true,'ok','XBMC'
 end

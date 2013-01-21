@@ -3,6 +3,10 @@
   <functions>
 	local XBMCRemote 
 	
+	function update_idle_time()
+		XBMCRemote.update_idle_time()
+	end
+	
 	function scheduled_ping()
 		XBMCRemote.scheduled_ping()
 	end
@@ -44,7 +48,6 @@
         XBMCRemote.XBMCall(lul_settings.action)
       </run>
     </action>
-	
    </actionList>
 </implementation>
  
