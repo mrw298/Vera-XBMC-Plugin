@@ -28,6 +28,10 @@ local TASK_ERROR_PERM = -2
 local TASK_SUCCESS = 4
 local TASK_BUSY = 1
 
+local XBMC_PLAYSTATE_ONPLAY = "OnPlay"
+local XBMC_PLAYSTATE_ONSTOP = "OnStop"
+local XBMC_PLAYSTATE_UNKNOWN = "--"
+
 
 local function log(stuff, level)
 	luup.log("XBMC: " .. stuff, (level or 50))
@@ -105,13 +109,18 @@ end
 function xbmc_json_call( meth, para, msg_id )
 	--local cmd = '{"jsonrpc": "2.0", "method": "" .. meth .. "", "params": {" .. para .. "}, "id": 1}'
 	
+	if ( meth == nil ) then
+		debug( "call to xbmc_json_call with nil method, ignore it")
+		return false
+	end
+	
 	local request = {
 						jsonrpc = "2.0";
-						id = msg_id or "1";
+						id = msg_id or meth;
 					}
 					
-	if meth ~= nil then request.method = meth end
-	if (para ~= nil) and (type(para) == "table")then request.params = para end
+	request.method = meth
+	if (para ~= nil) and (type(para) == "table") then request.params = para end
 	
 	local cmd = json.encode(request)
 	
@@ -322,7 +331,19 @@ end
 function xbmc_getActivePlayers()
 	method = "Player.GetActivePlayers"
 	
-	return xbmc_json_call( method, nil, "GetActivePlayers" )		
+	return xbmc_json_call( method )		
+end
+
+function xbmc_getWhatsOnPlayer( player_id )
+
+	local method = "Player.GetItem"
+	local params = {
+		properties = { "title" };
+		playerid = player_id;
+	}
+	
+	-- buffer any new data
+	xbmc_json_call( method, params, "XBMCRemote.GetWhatsPlaying" )				
 end
 
 function getStopTime()
@@ -341,9 +362,9 @@ function setPlayerStatus(status)
 
 	local current_StopTime = getStopTime()
 
-	if ((status == "OnStop") or (status == "OnEnded")) and (current_StopTime == "--") then
+	if ((status == XBMC_PLAYSTATE_ONSTOP) or (status == "OnEnded")) and (current_StopTime == "--") then
 		setStopTime( socket.gettime() )
-	elseif (status == "OnPlay") or (status == "--") then
+	elseif (status == XBMC_PLAYSTATE_ONPLAY) or (status == XBMC_PLAYSTATE_UNKNOWN) then
 		setStopTime( "--" )
 		set_idle_time( "--" )
 	end
@@ -356,9 +377,12 @@ function scheduled_ping_ok()
 	writeVariableIfChanged(deviceid, serviceid, "PingStatus", "up")
 end
 
-function scheduled_ping_fail()
-	writeVariableIfChanged(deviceid, serviceid, "PingStatus", "down")
-	setPlayerStatus("--")
+function scheduled_ping_fail(msg)
+
+	local status_msg = msg or "down"
+
+	writeVariableIfChanged(deviceid, serviceid, "PingStatus", status_msg)
+	setPlayerStatus(XBMC_PLAYSTATE_UNKNOWN)
 	set_idle_time("--")
 end
 
@@ -405,13 +429,13 @@ function scheduled_ping()
 	
 	-- check whether we're still connected
 	if (luup.io.is_connected(deviceid) == false) then
-		scheduled_ping_fail()
+		scheduled_ping_fail("down - no JSON")
 	
 		log( "io.is_connected is false - No longer connected in scheduled ping, attempt to reconnect")
-		
 		xbmc_connect()
 
-		luup.call_timer("scheduled_ping", 1, ping_interval, "", "")
+		-- if we can ping, no JSON we might be waiting for XBMC to start lets try to connect again shortly
+		luup.call_timer("scheduled_ping", 1, SOON, "", "")
 		return false			
 	end
 			
@@ -438,32 +462,54 @@ local function XBMC_processNotification( method, params)
 		
 		setPlayerStatus( state )
 		
-		if (state == "OnPlay" ) then 
+		if (state == XBMC_PLAYSTATE_ONPLAY ) then 
 			-- in here send a request for more information on what's playing
 			-- then process it in the event handler
-			
-			if (params.data ~= nil) and (params.data.item ~= nil) and (params.data.player ~= nil) then
-				local item = params.data.item
+		
+			if ( params.data ~= nil ) and ( params.data.player ~= nil ) then
 				local player = params.data.player
-				
-				local new_method = "Player.GetItem"
-				local new_params = {
-					properties = { "title" };
-					playerid = player.playerid;
-				}
-				
-				-- buffer any new data
-				xbmc_json_call( new_method, new_params, "GetWhatsPlaying" )				
-			
+				xbmc_getWhatsOnPlayer( player.playerid)
 			end
-			
-		elseif ( state == "OnStop") then
+					
+		elseif ( state == XBMC_PLAYSTATE_ONSTOP) then
 			-- dont think this is correct
 --			setPlayerStatus("--")
 		end
 	end
 	
 end
+
+local function XBMC_IncomingMessage_XBMCRemote_GetWhatsPlaying(oMsg)
+	if (oMsg.result ~= nil) and (oMsg.result.item ~= nil) then		
+		local item = oMsg.result.item
+		
+		if ( item.type ~= nil) and (item.title ~= nil) then
+			local playing = item.type .. ": " .. item.title
+			writeVariableIfChanged(deviceid, serviceid, "CurrentPlaying", playing )
+		end
+	end
+end
+
+local function XBMC_IncomingMessage_Player_GetActivePlayers(oMsg)
+	if (oMsg.result ~= nil) then
+		-- if the results variable is present but empty then nothing is playing
+		if (next(oMsg.result) == nil) then
+			debug( "nothing playing in GetActivePlayers")
+			setPlayerStatus(XBMC_PLAYSTATE_ONSTOP)
+		elseif (oMsg.result[1].playerid ~= nil) then
+			debug("found an active player")
+			setPlayerStatus(XBMC_PLAYSTATE_ONPLAY)
+		else
+			debug( "unknown response to the GetActivePlayers request")
+		end
+	end
+end
+
+XBMC_INCOMING_MESSAGE_HANDLERS = { 
+	XBMCRemote_GetWhatsPlaying 	= XBMC_IncomingMessage_XBMCRemote_GetWhatsPlaying;
+	Player_GetActivePlayers	 	= XBMC_IncomingMessage_Player_GetActivePlayers;
+}
+
 
 local function XBMC_processIncomingMessage(msg)
 	debug( "XBMC_processIncomingMessage: " .. msg )
@@ -478,30 +524,26 @@ local function XBMC_processIncomingMessage(msg)
 		return false 
 	end
 	
+	
 	if( oMsg.id == nil) and (oMsg.method ~= nil) then
 		debug( "found a notification" )
 		XBMC_processNotification( oMsg.method, oMsg.params )
-	elseif ( oMsg.id == "GetWhatsPlaying" ) and (oMsg.result ~= nil) and (oMsg.result.item ~= nil) then
-		-- abuse the ID flag to maintain state as GetItem is a generic response
-		local item = oMsg.result.item
-		
-		if ( item.type ~= nil) and (item.title ~= nil) then
-			local playing = item.type .. ": " .. item.title
-			writeVariableIfChanged(deviceid, serviceid, "CurrentPlaying", playing )
-		end
-	elseif (oMsg.id == "GetActivePlayers") and (oMsg.result ~= nil) then
-		-- if the results variable is present but empty then nothing is playing
-		if (next(oMsg.result) == nil) then
-			debug( "nothing playing in GetActivePlayers")
-			setPlayerStatus("OnStop")
-		elseif (oMsg.result[1].playerid ~= nil) then
-			debug("found an active player")
-			setPlayerStatus("OnPlay")
+	elseif( oMsg.id ~= nil) then
+		-- convert the inbound id to our lookup table format
+		local idLookup = string.gsub(oMsg.id, "%.", "_")
+		debug( "Parsed incoming message id " .. idLookup)
+		if ( XBMC_INCOMING_MESSAGE_HANDLERS[idLookup] ~= nil) then
+			-- here we use a reference table to hold handlers that know how to process incoming messages
+			-- retrieve the reference to the function in the reference table
+			-- then execute it
+			local f = XBMC_INCOMING_MESSAGE_HANDLERS[idLookup]		
+			f(oMsg)
 		else
-			debug( "unknown response to the GetActivePlayers request")
+			debug( "unhandled message type" )
 		end
 	else
-		debug( "unhandled message type" )
+		-- shouldn't really get here
+		debug( "got a responce in XBMC_processIncomingMessage I didn't know what to do with")
 	end
 end
 
@@ -553,13 +595,12 @@ function init(lul_device)
 			local CurrentPlaying = readVariableOrInit( deviceid, serviceid, "CurrentPlaying", "--")
 		end
 		
-		if (ipAddress ~= "") and (json_tcp_port ~= "") then
-			xbmc_connect()
-		else
-			return false,'No IP supplied, please enter the IP.','XBMC'
+		if (ipAddress == "") or (json_tcp_port == "") then
+			return false,'No IP and JSON port supplied, please enter the IP/port to connect to.','XBMC'
 		end
 		
 		-- at startup do the first ping nearly immediately without waiting for the usual interval
+		-- so that the connection is established
 		log( "ping scheduled in " .. SOON .. " seconds" )
 		luup.call_timer("scheduled_ping", 1, SOON, "", "")
 		
