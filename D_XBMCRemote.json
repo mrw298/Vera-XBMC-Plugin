@@ -158,7 +158,7 @@
                "ControlType":"label",
                "text_align":"left",
                "Label":{
-                  "lang_tag":"playing",
+                  "lang_tag":"playingtitle",
                   "text":"Currently Playing:"
                },
                "Display":{
@@ -663,30 +663,6 @@
                }
             },
             {
-               "ControlGroup":"219",
-               "ControlType":"button",
-               "Label":{
-                  "lang_tag":"cmd_on",
-                  "text":"ON"
-               },
-               "Display":{
-                  "Top":160,
-                  "Left":60,
-                  "Width":80,
-                  "Height":20
-               },
-               "Command":{
-                  "Service":"urn:upnp-org:serviceId:XBMC1",
-                  "Action":"XBMCall",
-                  "Parameters":[
-                     {
-                        "Name":"action",
-                        "Value":"on"
-                     }
-                  ]
-               }
-            },
-            {
                "ControlGroup":"220",
                "ControlType":"label",
                "Label":{
@@ -883,20 +859,12 @@
             {
                "id":301,
                "dataType":"string",
-               "defaultValue":"--",
                "allowedValueList":[
                   {
                      "OnPlay":"OnPlay",
                      "HumanFriendlyText":{
                         "lang_tag":"playbackstarted",
                         "text":"OnPlay"
-                     }
-                  },
-                  {
-                     "OnStop":"OnEnd",
-                     "HumanFriendlyText":{
-                        "lang_tag":"playbackended",
-                        "text":"OnEnd"
                      }
                   },
                   {
@@ -911,13 +879,6 @@
                      "HumanFriendlyText":{
                         "lang_tag":"playbackpaused",
                         "text":"OnPause"
-                     }
-                  },
-                  {
-                     "OnResume":"OnResume",
-                     "HumanFriendlyText":{
-                        "lang_tag":"playbackresumed",
-                        "text":"OnResume"
                      }
                   }
                ],
@@ -944,7 +905,6 @@
             {
                "id":303,
                "dataType":"string",
-               "defaultValue":"--",
                "allowedValueList":[
                   {
                      "Started":"PingStatusUp",

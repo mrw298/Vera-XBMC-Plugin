@@ -1,45 +1,55 @@
 <?xml version="1.0" encoding="utf-8"?>
 <scpd xmlns="urn:schemas-upnp-org:service-1-0">
+
   <specVersion>
     <major>1</major>
     <minor>0</minor>
   </specVersion>
+  
   <serviceStateTable>
-		
-    <stateVariable>
-       <sendEventsAttribute>no</sendEventsAttribute>
+    <stateVariable sendEvents="yes">
        <name>Port</name>
        <dataType>string</dataType>
        <shortCode>port</shortCode>
     </stateVariable>
-    <stateVariable>
-       <sendEventsAttribute>no</sendEventsAttribute>
+    <stateVariable sendEvents="yes">
        <name>PingInterval</name>
        <dataType>string</dataType>
        <shortCode>pinginterval</shortCode>
     </stateVariable>
-    <stateVariable>
-       <sendEventsAttribute>no</sendEventsAttribute>
+    <stateVariable sendEvents="yes">
        <name>PingStatus</name>
        <dataType>string</dataType>
        <shortCode>pingstatus</shortCode>
     </stateVariable>
-    <stateVariable>
-       <sendEventsAttribute>no</sendEventsAttribute>
+    <stateVariable sendEvents="yes">
        <name>IdleTime</name>
        <dataType>string</dataType>
        <shortCode>idletime</shortCode>
     </stateVariable>
-    <stateVariable>
-       <sendEventsAttribute>no</sendEventsAttribute>
+    <stateVariable sendEvents="yes">
        <name>PlayerStatus</name>
        <dataType>string</dataType>
        <shortCode>playerstatus</shortCode>
     </stateVariable>
-		
+    <stateVariable sendEvents="yes">
+       <name>CurrentPlaying</name>
+       <dataType>string</dataType>
+       <shortCode>currentplaying</shortCode>
+    </stateVariable>
+    <stateVariable sendEvents="yes">
+       <name>StopTime</name>
+       <dataType>string</dataType>
+       <shortCode>stoptime</shortCode>
+    </stateVariable>
+    <stateVariable sendEvents="yes">
+       <name>varaction</name>
+       <dataType>string</dataType>
+       <shortCode>varaction</shortCode>
+    </stateVariable>
   </serviceStateTable>
+
   <actionList>
-	
     <action>
       <name>SetPlayerStatus</name>
       <argumentList>
@@ -70,8 +80,8 @@
         </argument>
       </argumentList>
     </action>
-	
   </actionList>
+  
 </scpd>
  
  
